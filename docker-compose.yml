@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  ocr_app:
+    build: .
+    container_name: ocr_app_container
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=
+      - DB_USER=tu_usuario
+      - DB_PASSWORD=tu_contraseña
+
+  db:
+    image: postgres:14.3
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: DistribuidosDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: MySecr3tPassword
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
+    driver: local
