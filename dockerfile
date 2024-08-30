@@ -1,24 +1,25 @@
-# Usa una imagen base de Python
 FROM python:3.10-slim
 
-# Instala las dependencias necesarias
-RUN apt-get update && apt-get install -y \
+# Install dependencies
+RUN apt-get update -y --fix-missing && \
+    apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-spa \
     poppler-utils \
-    postgresql-client
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instala las bibliotecas de Python necesarias
-RUN pip install --no-cache-dir pytesseract pdf2image psycopg2-binary multiprocessing
+# Copy application code
+COPY . /app
 
-# Crea un directorio de trabajo
+# Set working directory
 WORKDIR /app
 
-# Copia tu dataset al contenedor
-COPY ./datasets /app/datasets
+# Install Python dependencies
+RUN pip install --no-cache-dir pytesseract pdf2image psycopg2-binary
 
-# Copia el script de OCR al contenedor
-COPY ./ocr_script.py /app/ocr_script.py
+# Expose ports (if needed)
+EXPOSE 8080
 
-# Define el comando para ejecutar tu script de OCR
+# Command to run the application
 CMD ["python", "ocr_script.py"]

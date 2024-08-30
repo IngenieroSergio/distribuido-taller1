@@ -9,9 +9,9 @@ services:
     environment:
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_NAME=
-      - DB_USER=tu_usuario
-      - DB_PASSWORD=tu_contraseña
+      - DB_NAME=DistribuidosDB
+      - DB_USER=postgres
+      - DB_PASSWORD=MySecr3tPassword
 
   db:
     image: postgres:14.3
