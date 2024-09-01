@@ -25,7 +25,40 @@ conn = psycopg2.connect(
     port=os.getenv("DB_PORT", 5432)
 )
 
-# Ruta al dataset de PDFs con enviroment
+# Llama a la función setup_database al inicio
+def setup_database():
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS processed_files (
+                id SERIAL PRIMARY KEY,
+                processing_date TIMESTAMP,
+                file_path TEXT,
+                file_name TEXT,
+                processing_time FLOAT,
+                publication_date DATE,
+                newspaper_name TEXT,
+                unidades_militares TEXT[],
+                divisiones_politicas TEXT[]
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS processing_summary (
+                id SERIAL PRIMARY KEY,
+                total_processing_time FLOAT,
+                total_files_processed INT
+            )
+        """)
+        conn.commit()
+    except Exception as e:
+        print(f"Error al crear las tablas: {e}")
+    finally:
+        cursor.close()
+
+# Ejecutar setup_database para asegurar que las tablas se creen
+setup_database()
+
+# Ruta al dataset de PDFs con environment
 root_folder = os.getenv("ROOT_FOLDER")
 if not root_folder:
     raise ValueError("La variable de entorno ROOT_FOLDER no está configurada.")
@@ -161,36 +194,8 @@ def log_to_db(pdf_path, processing_date, processing_time, publication_date, news
     finally:
         cursor.close()
 
-def setup_database():
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS processed_files (
-                id SERIAL PRIMARY KEY,
-                processing_date TIMESTAMP,
-                file_path TEXT,
-                file_name TEXT,
-                processing_time FLOAT,
-                publication_date DATE,
-                newspaper_name TEXT,
-                unidades_militares TEXT[],
-                divisiones_politicas TEXT[]
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS processing_summary (
-                id SERIAL PRIMARY KEY,
-                total_processing_time FLOAT,
-                total_files_processed INT
-            )
-        """)
-        conn.commit()
-    except Exception as e:
-        print(f"Error al crear las tablas: {e}")
-    finally:
-        cursor.close()
-
 def process_pdfs_concurrently(folder_path, num_cores):
+    # Verifica y crea las tablas antes de procesar los PDFs
     setup_database()
     pdf_files = []
 
@@ -217,4 +222,4 @@ def log_summary_to_db(total_time, total_files):
     except Exception as e:
         print(f"Error al registrar el resumen en la base de datos: {e}")
     finally:
-        cursor.close()
+        cursor.close()
