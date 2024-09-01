@@ -6,12 +6,16 @@ services:
     container_name: ocr_app_container
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
       - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=DistribuidosDB
       - DB_USER=postgres
       - DB_PASSWORD=MySecr3tPassword
+    ports:
+      - "8000:8000"  # Asegúrate de que el puerto esté mapeado correctamente
 
   db:
     image: postgres:14.3
