@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import os
@@ -15,6 +16,15 @@ import spacy
 nlp = spacy.load("es_core_news_sm")
 
 app = FastAPI()
+
+# Agrega la configuración CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permitir todas las solicitudes de cualquier origen, reemplazar con un dominio específico si es necesario
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permitir todos los headers
+)
 
 # Configura la conexión a PostgreSQL usando variables de entorno
 conn = psycopg2.connect(
@@ -222,4 +232,4 @@ def log_summary_to_db(total_time, total_files):
     except Exception as e:
         print(f"Error al registrar el resumen en la base de datos: {e}")
     finally:
-        cursor.close()
+        cursor.close()
